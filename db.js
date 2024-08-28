@@ -52,12 +52,23 @@ connection.connect((err) => {
       FOREIGN KEY (user_id) REFERENCES users(user_id),
       FOREIGN KEY (device_id) REFERENCES devices(device_id)
   );
+  
+  CREATE TABLE IF NOT EXISTS server_passwords (
+      password_id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(user_id)
+  );
 
-ALTER TABLE users
-ADD COLUMN reset_password_token VARCHAR(255),
-ADD COLUMN reset_password_expires BIGINT;
-
-
+  CREATE TABLE IF NOT EXISTS locations (
+      location_id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      latitude DECIMAL(10, 8) NOT NULL,
+      longitude DECIMAL(11, 8) NOT NULL,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(user_id)
+  );
   `;
 
   connection.query(createTables, (err, results) => {

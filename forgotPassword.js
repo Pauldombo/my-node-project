@@ -25,7 +25,7 @@ router.post("/forgot-password", (req, res) => {
       return res.status(400).json({ error: "No user found with that email" });
     }
 
-    const resetLink = `http://localhost:3000/reset-password/${token}`;
+    const resetLink = `http://192.168.137.1:3000/reset-password/${token}`;
     const emailContent = `Please click on the following link to reset your password: ${resetLink}`;
 
     sendEmail(email, "Password Reset", emailContent)

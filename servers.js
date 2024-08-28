@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const insertDeviceDetails = require("./devicedatamoble");
-const deviceIpRouter = require("./deviceIp");
+const deviceIpRouter = require("./deviceip");
 const userSignupRouter = require("./userSignup");
 const userLoginRouter = require("./login");
 const forgotPasswordRouter = require("./forgotPassword"); // Import forgot password router
@@ -25,5 +24,4 @@ app.use("/api", laptopsRouter);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-  insertDeviceDetails();
 });

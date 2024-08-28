@@ -9,44 +9,43 @@ const insertLaptopDetailsForUser = (user_id) => {
   const operating_system = `${os.type()} ${os.release()}`;
   const device_type = "PC";
 
-  const insertLaptopDetails = `
-    INSERT INTO devices (user_id, device_name, device_type, operating_system, ip_address)
-    VALUES (?, ?, ?, ?, ?);
+  // Check if the device already exists for the user
+  const checkEntry = `
+    SELECT * FROM devices WHERE user_id = ? AND device_name = ? AND ip_address = ?;
   `;
 
   connection.query(
-    insertLaptopDetails,
-    [user_id, device_name, device_type, operating_system, ip_address],
+    checkEntry,
+    [user_id, device_name, ip_address],
     (err, results) => {
       if (err) {
+        console.error("Error checking existing device:", err);
         return;
       }
 
-      const checkEntry = `
-        SELECT * FROM devices WHERE user_id = ? AND device_name = ? AND ip_address = ?;
+      if (results.length === 0) {
+        // Insert new device details if not already present
+        const insertLaptopDetails = `
+        INSERT INTO devices (user_id, device_name, device_type, operating_system, ip_address)
+        VALUES (?, ?, ?, ?, ?);
       `;
-      connection.query(
-        checkEntry,
-        [user_id, device_name, ip_address],
-        (err, results) => {
-          if (results.length === 0) {
-            return;
+
+        connection.query(
+          insertLaptopDetails,
+          [user_id, device_name, device_type, operating_system, ip_address],
+          (err) => {
+            if (err) {
+              console.error("Error inserting device details:", err);
+            } else {
+              console.log("Device details inserted successfully.");
+            }
           }
-        }
-      );
+        );
+      } else {
+        console.log("Device details already exist.");
+      }
     }
   );
 };
 
-const getUserAndInsertLaptopDetails = () => {
-  connection.query("SELECT user_id FROM users LIMIT 1", (err, results) => {
-    if (results.length === 0) {
-      return;
-    }
-
-    const user_id = results[0].user_id;
-    insertLaptopDetailsForUser(user_id);
-  });
-};
-
-module.exports = getUserAndInsertLaptopDetails;
+module.exports = insertLaptopDetailsForUser;

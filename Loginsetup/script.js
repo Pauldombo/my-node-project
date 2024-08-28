@@ -15,7 +15,7 @@ document
     }
 
     try {
-      const response = await fetch("http://192.168.110.90:3000/api/signup", {
+      const response = await fetch("http://192.168.137.238:3000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json; charset=UTF-8",
