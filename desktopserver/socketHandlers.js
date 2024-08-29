@@ -1,74 +1,10 @@
-const express = require("express");
-const http = require("http");
-const socketIo = require("socket.io");
-const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
 const robot = require("robotjs");
-const screenshot = require("screenshot-desktop");
 const os = require("os");
+const db = require("./db");
+const { startScreenSharing } = require("./screenSharing");
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
-
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "pauld",
-  password: "Angelawhite@#$1",
-  database: "Remotconnectiondb",
-  multipleStatements: true,
-});
-
-db.connect((err) => {
-  if (err) {
-    console.error("Error connecting to the database:", err);
-    return;
-  }
-  console.log("Connected to the MySQL database");
-});
-
-app.get("/userId/:deviceName", (req, res) => {
-  const { deviceName } = req.params;
-  const query = "SELECT id FROM devices WHERE name = ?";
-  db.query(query, [deviceName], (err, result) => {
-    if (err) {
-      res.status(500).send("Error fetching user ID");
-    } else {
-      if (result.length > 0) {
-        res.send({ userId: result[0].id });
-      } else {
-        res.status(404).send("Device not found");
-      }
-    }
-  });
-});
-
-app.get("/get_location", (req, res) => {
-  const query =
-    "SELECT latitude, longitude FROM locations ORDER BY timestamp DESC LIMIT 1"; // Modify query as needed
-  db.query(query, (err, result) => {
-    if (err) {
-      res.status(500).send("Error fetching location");
-    } else {
-      if (result.length > 0) {
-        const { latitude, longitude } = result[0];
-        res.send(`${latitude},${longitude}`);
-      } else {
-        res.status(404).send("No location found");
-      }
-    }
-  });
-});
-
-app.get("/shutdown", (req, res) => {
-  res.send("Server shutting down...");
-  server.close(() => {
-    console.log("Server is shutting down.");
-    process.exit(0);
-  });
-});
-
-io.on("connection", (socket) => {
+const handleSocketConnection = (socket) => {
   console.log("Client connected");
 
   socket.emit("device_name", os.hostname());
@@ -117,7 +53,6 @@ io.on("connection", (socket) => {
   socket.on("generate_location", (data) => {
     const { deviceName, latitude, longitude } = data;
     const query = "SELECT device_id FROM devices WHERE device_name = ?";
-
     db.query(query, [deviceName], (err, result) => {
       if (err || result.length === 0) {
         console.error("Error fetching user ID:", err || "Device not found");
@@ -126,7 +61,6 @@ io.on("connection", (socket) => {
         const userId = result[0].device_id;
         const insertQuery =
           "INSERT INTO locations (user_id, latitude, longitude) VALUES (?, ?, ?)";
-
         db.query(insertQuery, [userId, latitude, longitude], (err, results) => {
           if (err) {
             console.error("Error storing location:", err);
@@ -203,15 +137,7 @@ io.on("connection", (socket) => {
 
   socket.on("keyboard_action", (data) => {
     const { key, isKeyDown } = data;
-    let mappedKey;
-
-    // Map the 'Enter' key specifically
-    if (key === "Enter") {
-      mappedKey = "enter";
-    } else {
-      // Use the keyMap for other keys
-      mappedKey = keyMap[key] || key;
-    }
+    let mappedKey = keyMap[key] || key;
 
     if (mappedKey) {
       robot.keyToggle(mappedKey, isKeyDown ? "down" : "up");
@@ -223,30 +149,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
-});
+};
 
-function startScreenSharing(socket) {
-  let isSharing = false;
-
-  const shareScreen = async () => {
-    if (!isSharing) {
-      isSharing = true;
-      try {
-        const img = await screenshot();
-        const imgBase64 = img.toString("base64");
-        socket.emit("screen_data", imgBase64);
-      } catch (error) {
-        console.error("Error capturing screen:", error);
-      }
-      isSharing = false;
-    }
-  };
-
-  const intervalId = setInterval(shareScreen, 33);
-
-  socket.on("disconnect", () => {
-    clearInterval(intervalId);
-  });
-}
-
-server.listen(5000, () => console.log("Server running on port 5000"));
+module.exports = { handleSocketConnection };
