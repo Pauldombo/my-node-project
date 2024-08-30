@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const robot = require("robotjs");
 const os = require("os");
 const db = require("./db");
