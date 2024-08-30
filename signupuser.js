@@ -18,15 +18,10 @@ router.post("/signup", async (req, res) => {
     const connection = await pool.getConnection();
 
     try {
-      const [results] = await connection.query(
+      await connection.query(
         `INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)`,
         [username, email, hash]
       );
-
-      const user_id = results.insertId;
-
-      // Insert laptop details for the user
-      await insertLaptopDetailsForUser(user_id);
 
       res.status(200).send("Sign up successful!");
     } finally {
