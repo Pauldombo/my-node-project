@@ -5,13 +5,12 @@ const bcrypt = require("bcryptjs");
 const connection = require("./dbconnection"); // Import the connection
 const insertLaptopDetailsForUser = require("./devicedatamoble"); // Import device data function
 
-const app = express();
-app.use(express.json());
+const router = express.Router();
 
 const SECRET_KEY = process.env.SECRET_KEY || "b[G%DtWJK<a:pBj+S9l{V@='2{lQvB"; // Use environment variable for security
 
 // Signup route
-app.post("/api/signup", (req, res) => {
+router.post("/signup", (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -42,7 +41,4 @@ app.post("/api/signup", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+module.exports = router;
