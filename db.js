@@ -2,10 +2,10 @@ const mysql = require("mysql2");
 
 // Create a connection to the database with multiple statements enabled
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "pauld", //  MySQL user
-  password: "Angelawhite@#$1", //  MySQL password
-  database: "Remotconnectiondb", //  MySQL database name
+  host: "bsd05j9tx0ens4wdc3eg-mysql.services.clever-cloud.com",
+  user: "uxh5wazsgwbxoahx", //  MySQL user
+  password: "83hoPcQnlrCThVknh6gs", //  MySQL password
+  database: "bsd05j9tx0ens4wdc3eg", //  MySQL database name
   multipleStatements: true,
 });
 
