@@ -11,12 +11,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error("Error connecting to the database:", err);
-    return;
-  }
-  console.log("Connected to the MySQL database");
-});
+// No need to call `connection.connect()` since `pool` manages the connections automatically
 
 module.exports = pool.promise(); // Exporting a promise-based pool
