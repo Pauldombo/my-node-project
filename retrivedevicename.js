@@ -1,18 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const connection = require("./dbconnection");
+const pool = require("./dbconnection"); // Use the pool connection
 
 // Endpoint to retrieve laptop names
-router.get("/laptops", (req, res) => {
+router.get("/laptops", async (req, res) => {
   const query = "SELECT device_name FROM devices"; // Adjust the query according to your database schema
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error("Error retrieving laptop names:", err);
-      res.status(500).send("Error retrieving laptop names");
-      return;
-    }
+
+  try {
+    const [results] = await pool.query(query);
     res.status(200).json(results);
-  });
+  } catch (err) {
+    console.error("Error retrieving laptop names:", err);
+    res.status(500).send("Error retrieving laptop names");
+  }
 });
 
 module.exports = router;
