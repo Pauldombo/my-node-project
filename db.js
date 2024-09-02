@@ -23,7 +23,7 @@ connection.connect((err) => {
       user_id INT AUTO_INCREMENT PRIMARY KEY,
       username VARCHAR(50) NOT NULL UNIQUE,
       email VARCHAR(100) NOT NULL UNIQUE,
-      password_hash VARCHAR(255) NOT NULL,
+      user_password_hash VARCHAR(255) NOT NULL,  -- Renamed
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   );
@@ -56,7 +56,7 @@ connection.connect((err) => {
   CREATE TABLE IF NOT EXISTS server_passwords (
       password_id INT AUTO_INCREMENT PRIMARY KEY,
       user_id INT NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
+      server_password_hash VARCHAR(255) NOT NULL,  -- Renamed
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
   );
@@ -69,7 +69,7 @@ connection.connect((err) => {
       timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
   );
-  `;
+`;
 
   connection.query(createTables, (err, results) => {
     if (err) {

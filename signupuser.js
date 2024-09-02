@@ -18,12 +18,19 @@ router.post("/signup", async (req, res) => {
     const connection = await pool.getConnection();
 
     try {
+      // Insert the new user into the users table
       await connection.query(
-        `INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)`,
+        `INSERT INTO users (username, email, user_password_hash) VALUES (?, ?, ?)`,
         [username, email, hash]
       );
 
       res.status(200).send("Sign up successful!");
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY") {
+        res.status(409).send("Email is already registered.");
+      } else {
+        throw err;
+      }
     } finally {
       connection.release(); // Release the connection back to the pool
     }

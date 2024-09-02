@@ -24,6 +24,47 @@ function ensureConnection(callback) {
 const handleSocketConnection = (socket) => {
   console.log("Client connected");
 
+  // Insert a new session when a client connects
+  ensureConnection((err) => {
+    if (err) {
+      console.error("Error connecting to the database:", err);
+      return;
+    }
+
+    const sessionQuery =
+      "INSERT INTO sessions (user_id, device_id, session_start) VALUES (?, ?, NOW())";
+    // Replace `userId` and `deviceId` with the actual values retrieved from the database
+    db.query(sessionQuery, [userId, deviceId], (err, result) => {
+      if (err) {
+        console.error("Error inserting session:", err);
+      } else {
+        const sessionId = result.insertId; // Get the newly inserted session ID
+
+        // Listen for disconnect event
+        socket.on("disconnect", () => {
+          console.log("Client disconnected");
+
+          // Update the session with the end time
+          const updateQuery =
+            "UPDATE sessions SET session_end = NOW() WHERE session_id = ?";
+          db.query(updateQuery, [sessionId], (err, result) => {
+            if (err) {
+              console.error("Error updating session end time:", err);
+            } else {
+              console.log("Session ended and updated in the database");
+            }
+          });
+        });
+      }
+    });
+  });
+
+  // Reconnection handling
+  socket.on("reconnect", () => {
+    console.log("Client reconnected");
+    // Optional: Logic to resume the session
+  });
+
   socket.emit("device_name", os.hostname());
 
   socket.on("set_password", async ({ password, email }) => {
